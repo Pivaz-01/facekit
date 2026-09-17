@@ -1,0 +1,19 @@
+# Everything, which is what you want unless you are only using part of
+# the pipeline. See the README for the per-stage extras.
+#
+# Install into Python 3.10, 3.11 or 3.12. On 3.13 every line here
+# installs except mediapipe, which has no wheel above 3.12, so the
+# landmark stage will be unavailable.
+
+# core: the interface and the numeric stages
+flask>=3.0
+numpy>=1.24,<3
+pandas>=2.0
+scipy>=1.10
+
+# stage 1, landmark extraction
+mediapipe>=0.10
+opencv-python>=4.8
+
+# stage 4, plots
+matplotlib>=3.7

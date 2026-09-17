@@ -1,0 +1,21 @@
+# conda env create -f environment.yml
+# conda activate facekit
+#
+# Python is pinned to 3.12 because mediapipe publishes no wheels above
+# it. mediapipe and opencv come from pip: conda-forge's opencv build
+# and mediapipe's bundled one disagree about which libstdc++ to use,
+# and letting pip install both keeps them consistent.
+name: facekit
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - flask>=3.0
+  - numpy>=1.24,<3
+  - pandas>=2.0
+  - scipy>=1.10
+  - matplotlib>=3.7
+  - pip
+  - pip:
+      - mediapipe>=0.10
+      - opencv-python>=4.8

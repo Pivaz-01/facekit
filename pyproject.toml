@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "facekit"
+version = "1.0.0"
+description = "Facial landmark extraction, mouth-area analysis and left-right movement metrics for clinical video"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+# 3.10 is the floor for the syntax used here. The core installs on 3.13
+# too; only the landmark stage will not, because mediapipe publishes no
+# wheels above 3.12.
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "numpy>=1.24,<3",
+    "pandas>=2.0",
+    "scipy>=1.10",
+]
+
+[[project.authors]]
+name = "Luca Pivetti"
+
+[project.optional-dependencies]
+mesh = ["mediapipe>=0.10", "opencv-python>=4.8"]
+plots = ["matplotlib>=3.7"]
+all = ["facekit[mesh,plots]"]
+
+[project.scripts]
+facekit = "facekit.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Pivaz-01/facekit"
+Issues = "https://github.com/Pivaz-01/facekit/issues"
+
+[tool.setuptools.packages.find]
+include = ["facekit*"]
+
+[tool.setuptools.package-data]
+"facekit.web" = ["templates/*.html", "static/*"]

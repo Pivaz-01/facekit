@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+title: "facekit: facial landmark extraction, mouth-area analysis and left-right movement metrics for clinical video"
+message: "If you use this software, please cite it along with MediaPipe Face Mesh."
+type: software
+authors:
+  - family-names: Pivetti
+    given-names: Luca
+repository-code: "https://github.com/Pivaz-01/facekit"
+license: GPL-3.0-or-later
+version: 1.0.0
+date-released: "2026-09-17"
+keywords:
+  - facial-analysis
+  - face-mesh
+  - mediapipe
+  - facial-palsy
+  - clinical-video
+  - movement-analysis
+references:
+  - type: conference-paper
+    title: "Real-time Facial Surface Geometry from Monocular Video on Mobile GPUs"
+    authors:
+      - family-names: Kartynnik
+        given-names: Yury
+      - family-names: Ablavatski
+        given-names: Artsiom
+      - family-names: Grishchenko
+        given-names: Ivan
+      - family-names: Grundmann
+        given-names: Matthias
+    collection-title: "CVPR Workshop on Computer Vision for Augmented and Virtual Reality"
+    year: 2019
+    url: "https://arxiv.org/abs/1907.06724"
+    notes: "The face mesh model every measurement in facekit is derived from."
+  - type: software
+    title: "MediaPipe"
+    authors:
+      - name: "Google"
+    url: "https://github.com/google-ai-edge/mediapipe"
+    license: Apache-2.0
+    notes: "Provides the Face Mesh solution used for landmark extraction."
+  - type: article
+    title: "Array programming with NumPy"
+    authors:
+      - family-names: Harris
+        given-names: "Charles R."
+    journal: Nature
+    volume: 585
+    year: 2020
+    doi: "10.1038/s41586-020-2649-2"

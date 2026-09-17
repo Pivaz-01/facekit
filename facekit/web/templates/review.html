@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}facekit review{% endblock %}
+{% block tagline %}reviewing the openings in each recording{% endblock %}
+
+{% block head %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block body %}
+<div class="review-shell">
+
+  <aside class="sidebar">
+    <section class="panel">
+      <div class="job-head">
+        <h2 style="margin:0">Recordings</h2>
+        <span class="spacer" style="flex:1"></span>
+        <button class="quiet small" type="button" id="reload">Reload</button>
+      </div>
+      <p class="field help" id="source-path" style="word-break:break-all"></p>
+      <ul class="recording-list" id="recordings"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>When you are done</h2>
+      <button class="stop" type="button" id="export" style="width:100%">Save and export</button>
+      <p class="field help" style="margin-top:9px">Writes every reviewed
+        recording to the events CSV. Your marks are kept as you go, so you can
+        close this page and come back.</p>
+    </section>
+  </aside>
+
+  <main>
+    <section class="panel">
+      <div class="message" id="message" hidden></div>
+
+      <div class="job-head">
+        <h2 style="margin:0" id="heading">Loading</h2>
+        <span class="spacer" style="flex:1"></span>
+        <button class="quiet small" type="button" id="prev">Previous</button>
+        <button class="quiet small" type="button" id="next">Next</button>
+      </div>
+
+      <div id="chart"></div>
+
+      <p class="keys">
+        <span style="color:#a0aec0">solid grey</span> measured
+        <span style="color:#2b6cb0">dotted</span> smoothed, used for detection
+        <span style="color:#2f855a">solid green</span> spline, the slopes come from this
+        <span class="key peak">peak</span>
+        <span class="key valley">valley</span>
+        <span class="key manual">manual</span>
+        <span style="color:#d69e2e">star</span> steepest point of each rise
+      </p>
+
+      <div class="controls">
+        <div class="control">
+          <label for="window">Smoothing</label>
+          <input type="range" id="window" min="3" max="31" step="2" value="5">
+          <output id="window-out">5</output>
+        </div>
+        <div class="control">
+          <label for="sensitivity">Sensitivity</label>
+          <input type="range" id="sensitivity" min="5" max="95" step="5" value="50">
+          <output id="sensitivity-out">50%</output>
+        </div>
+        <button class="go small" type="button" id="redetect">Detect again</button>
+        <button class="quiet small" type="button" id="clear">Clear marks</button>
+      </div>
+
+      <div class="readout">
+        <span>Rises <b id="n-rises">0</b></span>
+        <span>Mean rise angle <b id="mean-angle">—</b></span>
+        <span>Steepest rise <b id="max-slope">—</b></span>
+      </div>
+
+      <p class="field help" style="margin-top:10px;max-width:70ch">
+        Click any measured point to mark or unmark it. A marked point becomes a
+        peak or a valley according to the smoothed curve around it, or stays
+        manual where the curve is flat. Only a valley followed by a peak makes a
+        rise, so a missing valley is the usual reason an opening is not counted.
+      </p>
+
+      <div class="frames" id="frames"></div>
+    </section>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='review.js') }}"></script>
+{% endblock %}

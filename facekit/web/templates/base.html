@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}facekit{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='facekit.css') }}">
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<header class="masthead">
+  <h1>facekit</h1>
+  <span class="tagline">{% block tagline %}facial movement analysis, on this machine{% endblock %}</span>
+  <span class="spacer"></span>
+  <nav>
+    <a href="/">Settings and stages</a>
+    <a href="/review" id="nav-review">Review openings</a>
+  </nav>
+  <span class="tagline">{{ version }}</span>
+</header>
+
+{% block body %}{% endblock %}
+
+<script src="{{ url_for('static', filename='facekit.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

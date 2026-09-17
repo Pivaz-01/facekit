@@ -1,0 +1,62 @@
+# Participant data must never be committed.
+#
+# Video is the obvious case, but a landmark CSV is a face: 478 points
+# per frame is enough to reconstruct one, and the mask renders are
+# identifiable to anyone who knows the person. The plot tree is
+# aggregated but its filenames and axis labels carry session dates.
+#
+# If you fork this for your own study, run `git status` before your
+# first push, and remember that absolute paths saved in settings can
+# themselves identify a study or a participant.
+
+# recordings
+*.mp4
+*.mov
+*.MP4
+*.MOV
+*.avi
+*.mkv
+*.webm
+
+# renders facekit produces
+*_landmarks.mp4
+*_only_mask.mp4
+*_mesh.mp4
+
+# landmark and metric tables
+*.csv
+*.tsv
+face_landmarks.csv
+all_landmarks.csv
+all_frame_metrics.csv
+
+# figures
+*.pdf
+plots/
+best_quartile/
+
+# saved settings, presets and review progress
+.facekit/
+settings.json
+presets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# editors and platforms
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# the documentation screenshots are the deliberate exception
+!docs/*.png

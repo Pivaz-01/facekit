@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}facekit settings{% endblock %}
+
+{% block body %}
+<div class="shell">
+
+  <aside class="sidebar">
+    <section class="panel">
+      <h2>The pipeline</h2>
+      <ol class="pipeline">
+        {% for stage in stages %}
+        {% set report = env.stages | selectattr("stage", "equalto", stage.key) | first %}
+        <li class="stage" data-ready="{{ 'true' if report.ok else 'false' }}">
+          <span class="ordinal">{{ loop.index }}</span>
+          <div>
+            <div class="title">{{ stage.title }}</div>
+            {% if report.ok %}
+            <div class="note">Ready{% if report.backends %}
+              ({{ report.backends | join(' and ') }} API){% endif %}</div>
+            {% elif report.missing %}
+            <div class="note missing">Needs {{ report.missing | join(', ') }}</div>
+            {% else %}
+            <div class="note missing">{{ report.note }}</div>
+            {% endif %}
+            <div class="actions">
+              {% if stage.key == 'events' %}
+              <button class="go small" type="button" data-save-then="/review"
+                      title="Saves your settings, then opens the picker">Review</button>
+              <button class="quiet small" type="button" data-run="{{ stage.key }}"
+                      {% if not report.ok %}disabled{% endif %}
+                      title="Detect without review. Not for results.">Detect only</button>
+              {% else %}
+              <button class="go small" type="button" data-run="{{ stage.key }}"
+                      {% if not report.ok %}disabled{% endif %}>Run</button>
+              {% endif %}
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+
+    <section class="panel">
+      <h2>Environment</h2>
+      <div class="chips">
+        <span class="chip" data-ok="{{ 'true' if env.python_ok else 'false' }}">Python {{ env.python }}</span>
+        {% for report in env.stages %}
+        <span class="chip" data-ok="{{ 'true' if report.ok else 'false' }}"
+              title="{{ report.install or 'installed' }}">{{ report.stage }}</span>
+        {% endfor %}
+      </div>
+      {% if not env.python_ok %}
+      <p class="field help">MediaPipe publishes wheels for Python 3.9 to 3.12.
+        Stages 2 to 4 will still run here; stage 1 may not install.</p>
+      {% endif %}
+      {% if env.dll_dirs %}
+      <details class="field help" style="margin-top:8px">
+        <summary>Native library directories</summary>
+        {% for path in env.dll_dirs %}<div>{{ path }}</div>{% endfor %}
+      </details>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Presets</h2>
+      <div class="field">
+        <select id="preset-name">
+          <option value="">Saved configurations</option>
+          {% for name in presets %}<option value="{{ name }}">{{ name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="stage-actions" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="quiet small" type="button" id="preset-load">Load</button>
+        <button class="quiet small" type="button" id="preset-save">Save as</button>
+        <button class="quiet small" type="button" id="preset-delete">Delete</button>
+      </div>
+      <p class="field help" style="margin-top:9px">One configuration per study
+        arm or per participant group is the usual reason to keep these.</p>
+    </section>
+  </aside>
+
+  <main>
+    <section class="panel" style="margin-bottom:18px">
+      <div class="job-head">
+        <h2 style="margin:0">Progress</h2>
+        <span class="status" id="job-status" data-state="idle">Idle</span>
+        <span class="spacer" style="flex:1"></span>
+        <button class="stop small" type="button" id="job-stop" disabled>Stop</button>
+      </div>
+      <div class="log" id="job-log"></div>
+    </section>
+
+    <section class="panel">
+      <div class="job-head">
+        <h2 style="margin:0">Settings</h2>
+        <span class="spacer" style="flex:1"></span>
+        <button type="button" id="save-settings">Save settings</button>
+      </div>
+
+      <div class="message" id="settings-message" hidden></div>
+
+      <label class="advanced-toggle">
+        <input type="checkbox" id="show-advanced">
+        Show advanced settings
+      </label>
+
+      <form id="settings-form">
+        {% for block in groups %}
+        <div class="group">
+          <h2>{{ block.group }}</h2>
+          {% for field in block.fields %}
+          {% if field.type == 'bool' %}
+          <div class="field checkbox{% if field.advanced %} advanced{% endif %}"
+               data-advanced="{{ 'true' if field.advanced else 'false' }}">
+            <input type="checkbox" id="f-{{ field.name }}" name="{{ field.name }}"
+                   data-type="bool" {% if field.value %}checked{% endif %}>
+            <div>
+              <label for="f-{{ field.name }}">{{ field.label }}
+                <span class="stages">{{ field.stages | join(', ') }}</span>
+              </label>
+              <p class="help">{{ field.help }}</p>
+            </div>
+          </div>
+          {% else %}
+          <div class="field{% if field.advanced %} advanced{% endif %}"
+               data-advanced="{{ 'true' if field.advanced else 'false' }}">
+            <label for="f-{{ field.name }}">{{ field.label }}
+              <span class="stages">{{ field.stages | join(', ') }}</span>
+            </label>
+
+            {% if field.type == 'choice' %}
+            <select id="f-{{ field.name }}" name="{{ field.name }}" data-type="choice">
+              {% for option in field.choices %}
+              <option value="{{ option }}" {% if option == field.value %}selected{% endif %}>{{ option }}</option>
+              {% endfor %}
+            </select>
+
+            {% elif field.type == 'multichoice' %}
+            <div class="multi" id="f-{{ field.name }}" data-type="multichoice"
+                 data-name="{{ field.name }}">
+              {% for option in field.choices %}
+              <label><input type="checkbox" value="{{ option }}"
+                     {% if option in field.value %}checked{% endif %}> {{ option }}</label>
+              {% endfor %}
+            </div>
+
+            {% elif field.type in ('int', 'float') %}
+            <input type="number" id="f-{{ field.name }}" name="{{ field.name }}"
+                   data-type="{{ field.type }}" value="{{ field.value }}"
+                   {% if field.type == 'float' %}step="any"{% endif %}
+                   {% if field.min is not none %}min="{{ field.min }}"{% endif %}
+                   {% if field.max is not none %}max="{{ field.max }}"{% endif %}>
+
+            {% elif field.type == 'strlist' and field.name == 'VIDEO_FOLDERS' %}
+            <textarea id="f-{{ field.name }}" name="{{ field.name }}"
+                      data-type="strlist"
+                      placeholder="One folder per line">{{ field.value | join('\n') }}</textarea>
+            <button class="quiet small" type="button" data-browse-append="f-{{ field.name }}"
+                    style="margin-top:6px">Add a folder</button>
+
+            {% elif field.type == 'path' %}
+            <div class="with-browse">
+              <input type="text" id="f-{{ field.name }}" name="{{ field.name }}"
+                     data-type="path" value="{{ field.value }}">
+              <button class="quiet small" type="button"
+                      data-browse="f-{{ field.name }}"
+                      data-files="{{ '0' if field.name == 'PLOTS_DIR' else '1' }}"
+                      data-default-name="{{ field.default_name }}">Pick</button>
+            </div>
+
+            {% elif field.type in ('intlist', 'strlist') %}
+            <input type="text" id="f-{{ field.name }}" name="{{ field.name }}"
+                   data-type="{{ field.type }}" value="{{ field.shown }}">
+
+            {% else %}
+            <input type="text" id="f-{{ field.name }}" name="{{ field.name }}"
+                   data-type="str" value="{{ field.value }}">
+            {% endif %}
+
+            <p class="help">{{ field.help }}</p>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </form>
+    </section>
+  </main>
+</div>
+
+<dialog id="browser">
+  <div class="dialog-head">
+    <button class="quiet small" type="button" id="browse-up">Up</button>
+    <span class="here" id="browse-here"></span>
+  </div>
+  <div class="dialog-body" id="browse-body"></div>
+  <div class="dialog-foot">
+    <button class="quiet" type="button" id="browse-cancel">Cancel</button>
+    <button type="button" id="browse-choose">Use this location</button>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='settings.js') }}"></script>
+{% endblock %}
