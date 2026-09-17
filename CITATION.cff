@@ -16,6 +16,10 @@ keywords:
   - facial-palsy
   - clinical-video
   - movement-analysis
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22818721
+    description: Concept DOI for all versions
 references:
   - type: conference-paper
     title: "Real-time Facial Surface Geometry from Monocular Video on Mobile GPUs"

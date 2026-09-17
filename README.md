@@ -572,6 +572,7 @@ that file is enough; the button and the BibTeX below stay in step with it.
                and left-right movement metrics for clinical video},
   year      = {2026},
   version   = {1.0.0},
+  doi       = {10.5281/zenodo.22775433},
   url       = {https://github.com/Pivaz-01/facekit}
 }
 ```
